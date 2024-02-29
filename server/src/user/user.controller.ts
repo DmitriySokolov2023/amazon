@@ -13,9 +13,7 @@ import {
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { Prisma, User } from '@prisma/client';
-import { AuthDto } from '../auth/dto/auth.dto';
 import { Auth } from '../auth/decorators/auth.decorator';
-import { RefreshDto } from '../auth/dto/refresh.dto';
 import { CurrentUser } from '../auth/decorators/user.decorator';
 import { UserDto } from './dto/user.dto';
 
@@ -24,10 +22,10 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
 
-  @Get(':id')
-  findById(@Param('id') id: Prisma.UserWhereUniqueInput) {
-    return this.userService.findById(id);
-  }
+  // @Get(':id')
+  // findById(@Param('id') id: number) {
+  //   return this.userService.findById(id);
+  // }
 
   @Get()
   findAllUsers(){
@@ -38,7 +36,7 @@ export class UserController {
   @Get('profile')
   @Auth()
   async getProfile(@CurrentUser('id') id: number) {
-    return this.userService.getProfile(id);
+    return this.userService.getProfile(1);
   }
 
   @UsePipes(new ValidationPipe())
@@ -53,7 +51,7 @@ export class UserController {
   @Auth()
   @HttpCode(200)
   @Patch('profile/favorites/:productId')
-  async toggleFavorite(@Param('productId')productId:string, @CurrentUser('id') id: number) {
+  async toggleFavorite(@Param('productId')productId:number, @CurrentUser('id') id: number) {
     return this.userService.toggleFavorite(id, productId);
   }
 }

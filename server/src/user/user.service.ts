@@ -1,10 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { Prisma, User } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 import { hash } from 'argon2';
 import { AuthDto } from '../auth/dto/auth.dto';
 import { UserDto } from './dto/user.dto';
+import { returnUserObject } from './return-user.object';
+import { NotFoundError } from 'rxjs';
 
 
 @Injectable()
@@ -15,16 +17,54 @@ export class UserService {
   getProfile(id:number){
     return this.prisma.user.findUnique({
       where: {
-        id: id,
+        id: +id,
       },
     });
   }
 
-  updateProfile(id:number, dto:UserDto){
+  async updateProfile(id:number, dto:UserDto){
+    const isSameUser =  await this.prisma.user.findUnique({
+      where: {
+        email: dto.email,
+      },
+    });
+    if (isSameUser && id !== isSameUser.id){
+      throw new BadRequestException('Email занят')
+    }
+    const user = await this.findById(id)
 
+    return this.prisma.user.update({
+      where:{
+        id:id
+      },
+      data:{
+        email:dto.email,
+        name:dto.name,
+        avatarPath:dto.avatarPath,
+        phone:dto.phone,
+        password:dto.password ? await  hash(dto.password):user.password
+      }
+    })
   }
-  toggleFavorite(id:number, productId:string){
+  async toggleFavorite(id:number, productId:number){
+    const user = await this.findById(id)
 
+    if(!user) throw  new NotFoundException('User not found')
+
+    const isExists = user.favorites.some(product => product.id === productId)
+
+    await this.prisma.user.update({
+      where:{
+        id:user.id
+      },
+      data:{
+        favorites:{
+          [isExists ? 'disconnect' : 'connect']:{
+            id:productId
+          }
+        }
+      }
+    })
   }
   findAllUsers(){
     return this.prisma.user.findMany()
@@ -38,12 +78,29 @@ export class UserService {
     });
   }
 
-  findById(id: Prisma.UserWhereUniqueInput) {
-    return this.prisma.user.findUnique({
+  findById(id: number, selectObject:Prisma.UserSelect = {}) {
+    const user =  this.prisma.user.findUnique({
       where: {
         id: +id,
       },
+      select:{
+       ...returnUserObject,
+        favorites:{
+          select:{
+            id:true,
+            name:true,
+            price:true,
+            images:true,
+            slug:true
+          }
+        },
+        ...selectObject
+      }
     });
+    if(!user){
+      throw new Error('User not found')
+    }
+    return user
   }
 
   async createUser(dto:AuthDto){
