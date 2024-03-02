@@ -33,13 +33,13 @@ model Product {
   price       String
   images      String[]
 
-  Category   Category? @relation(fields: [categoryId], references: [id])
+  category   Category? @relation(fields: [categoryId], references: [id])
   categoryId Int?      @map("category_id")
 
   orderItems OrderItem[]
   reviews    Review[]
-  User       User?       @relation(fields: [userId], references: [id])
-  userId     Int?
+  user       User?       @relation(fields: [userId], references: [id])
+  userId     Int?        @map("user_id")
 }
 
 model Category {
@@ -47,8 +47,9 @@ model Category {
   createdAt DateTime @default(now()) @map("create_at")
   updateAt  DateTime @updatedAt @map("update_at")
   name      String
+  slug      String   @unique
 
-  Product Product[]
+  product Product[]
 }
 
 model Review {
@@ -58,11 +59,11 @@ model Review {
   rating    Int
   text      String
 
-  User   User? @relation(fields: [userId], references: [id])
-  userId Int?
+  user   User? @relation(fields: [userId], references: [id])
+  userId Int?  @map("user_id")
 
-  Product   Product? @relation(fields: [productId], references: [id])
-  productId Int?
+  product   Product? @relation(fields: [productId], references: [id])
+  productId Int?     @map("product_id")
 }
 
 model Order {
@@ -73,7 +74,7 @@ model Order {
 
   items OrderItem[]
 
-  User   User? @relation(fields: [userId], references: [id])
+  user   User? @relation(fields: [userId], references: [id])
   userId Int?  @map("user_id")
 }
 

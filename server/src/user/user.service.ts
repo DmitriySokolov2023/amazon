@@ -14,7 +14,43 @@ export class UserService {
   constructor(private prisma: PrismaService) {
   }
 
-  getProfile(id:number){
+  findById(id: number, selectObject:Prisma.UserSelect = {}) {
+    const user =  this.prisma.user.findUnique({
+      where: {
+        id: +id,
+      },
+      select:{
+        ...returnUserObject,
+        favorites:{
+          select:{
+            id:true,
+            name:true,
+            price:true,
+            images:true,
+            slug:true
+          }
+        },
+        ...selectObject
+      }
+    });
+    if(!user){
+      throw new Error('User not found')
+    }
+    return user
+  }
+
+  async createUser(dto:AuthDto){
+    return this.prisma.user.create({
+      data:{
+        email:dto.email,
+        name:faker.person.firstName(),
+        avatarPath:faker.image.avatar(),
+        phone:faker.string.numeric('+7 (###) ###-##-##'),
+        password:await hash(dto.password)
+      }
+    })
+  }
+  getProfile(id:string){
     return this.prisma.user.findUnique({
       where: {
         id: +id,
@@ -46,12 +82,12 @@ export class UserService {
       }
     })
   }
-  async toggleFavorite(id:number, productId:number){
+  async toggleFavorite(id:number, productId:string){
     const user = await this.findById(id)
 
     if(!user) throw  new NotFoundException('User not found')
 
-    const isExists = user.favorites.some(product => product.id === productId)
+    const isExists = user.favorites.some(product => product.id === +productId)
 
     await this.prisma.user.update({
       where:{
@@ -60,11 +96,12 @@ export class UserService {
       data:{
         favorites:{
           [isExists ? 'disconnect' : 'connect']:{
-            id:productId
+            id:+productId
           }
         }
       }
     })
+    return 'Success'
   }
   findAllUsers(){
     return this.prisma.user.findMany()
@@ -78,40 +115,5 @@ export class UserService {
     });
   }
 
-  findById(id: number, selectObject:Prisma.UserSelect = {}) {
-    const user =  this.prisma.user.findUnique({
-      where: {
-        id: +id,
-      },
-      select:{
-       ...returnUserObject,
-        favorites:{
-          select:{
-            id:true,
-            name:true,
-            price:true,
-            images:true,
-            slug:true
-          }
-        },
-        ...selectObject
-      }
-    });
-    if(!user){
-      throw new Error('User not found')
-    }
-    return user
-  }
 
-  async createUser(dto:AuthDto){
-    return this.prisma.user.create({
-      data:{
-        email:dto.email,
-        name:faker.person.firstName(),
-        avatarPath:faker.image.avatar(),
-        phone:faker.string.numeric('+7 (###) ###-##-##'),
-        password:await hash(dto.password)
-      }
-    })
-  }
 }
