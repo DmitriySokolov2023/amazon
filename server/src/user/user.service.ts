@@ -50,13 +50,7 @@ export class UserService {
       }
     })
   }
-  getProfile(id:string){
-    return this.prisma.user.findUnique({
-      where: {
-        id: +id,
-      },
-    });
-  }
+
 
   async updateProfile(id:number, dto:UserDto){
     const isSameUser =  await this.prisma.user.findUnique({
@@ -103,9 +97,7 @@ export class UserService {
     })
     return 'Success'
   }
-  findAllUsers(){
-    return this.prisma.user.findMany()
-  }
+
   findByEmail(email: string) {
 
     return this.prisma.user.findUnique({
