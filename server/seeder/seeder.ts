@@ -20,7 +20,7 @@ const createProduct = async (quantity: number) => {
         name: productName,
         slug: getSlug(productName),
         description: faker.commerce.productDescription(),
-        price: faker.commerce.price(10, 999, 0),
+        price: +faker.commerce.price(10, 999, 0),
         images: Array.from({ length: getRandomNumber(2, 6) }).map(() =>
           faker.image.imageUrl(),
         ),
@@ -37,7 +37,7 @@ const createProduct = async (quantity: number) => {
               text: faker.lorem.paragraph(),
               user: {
                 connect: {
-                  id: 8,
+                  id: 1,
                 },
               },
             },
@@ -46,7 +46,7 @@ const createProduct = async (quantity: number) => {
               text: faker.lorem.paragraph(),
               user: {
                 connect: {
-                  id: 8,
+                  id: 1,
                 },
               },
             }

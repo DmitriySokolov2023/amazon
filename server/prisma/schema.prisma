@@ -30,7 +30,7 @@ model Product {
   name        String
   slug        String   @unique
   description String
-  price       String
+  price       Int
   images      String[]
 
   category   Category? @relation(fields: [categoryId], references: [id])
