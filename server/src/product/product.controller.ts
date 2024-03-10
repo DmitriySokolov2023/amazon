@@ -36,7 +36,7 @@ export class ProductController {
     return this.productService.findBySlug(slug);
   }
 
-  @Get('category/slug/:slug')
+  @Get('category/:slug')
   async findByCategorySlag(@Param('slug') slug:string) {
     return this.productService.findByCategorySlag(slug);
   }

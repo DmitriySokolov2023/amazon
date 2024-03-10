@@ -18,15 +18,7 @@ export class StatisticsService {
       reviews: true,
     });
 
-    // const totalAmount = await this.prisma.order.aggregate({
-    //   where: { userId },
-    // })
-
-
     return [
-      {
-        ...user
-      },
       {
         name: 'Orders',
         value: user.orders.length,
